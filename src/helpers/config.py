@@ -5,7 +5,6 @@ from pydantic_settings import BaseSettings,SettingsConfigDict
 class Settings(BaseSettings): # class settings inherts from class BaseSettings
     APP_NAME : str
     APP_VERSION : str
-    OPENAI_API_KEY : str
 
     FILE_ALLOWED_TYPES: list
     FILE_MAX_SIZE : int
@@ -33,6 +32,9 @@ class Settings(BaseSettings): # class settings inherts from class BaseSettings
     VECTOR_DB_BACKEND : str
     VECTOR_DB_PATH : str
     VECTOR_DB_DISTANCE_METHOD : str = None
+
+    DEFAULT_LANG: str = "eng" # Default language for the application
+    PRIMARY_LANG: str = "eng" # Primary language for the application
 
     class Config:
         env_file = ".env" # كل إلي في ال .env هيحصله loaded ويتحول لكلاس أقدر أستخدمه

@@ -36,6 +36,13 @@ async def upload_data(request: Request,project_id : str, file : UploadFile = Fil
 
     data_controller = DataController()
     # 2:validate the file properties لازم أختبر الملف إلي جايلي
+    print("================================")
+    print("FILE NAME:", file.filename)
+    print("CONTENT TYPE:", file.content_type)
+    print("FILE SIZE:", file.size)
+    print("ALLOWED TYPES:", app_settings.FILE_ALLOWED_TYPES)
+    print("================================")
+
     is_valid,result_signal = data_controller.validate_uploaded_file(file = file)
     if not is_valid:
         return JSONResponse(
@@ -159,8 +166,8 @@ async def process_endpoint(request: Request,project_id:str,process_request:Proce
     # responsible for processing the files and generating chunks
     process_controller = ProcessController(project_id=project_id)
 
-    no_records = 0
-    no_files = 0
+    num_records = 0
+    num_files = 0
 
     # store the chunks into the database
     chunk_model = await ChunkModel.create_instance(
@@ -221,13 +228,13 @@ async def process_endpoint(request: Request,project_id:str,process_request:Proce
         ]
 
         # increase the number of records inserted into the database by the number of chunks inserted for this file
-        no_records += await chunk_model.insert_many_chunks(chunks=file_chunks_records)
-        no_files += 1 # increased by 1 for each file processed successfully
+        num_records += await chunk_model.insert_many_chunks(chunks=file_chunks_records)
+        num_files += 1 # increased by 1 for each file processed successfully
 
     return JSONResponse(
         content={
             "signal": ResponseSignal.PROCESSING_SUCCESS.value,
-            "inserted_chunks": no_records,
-            "processed_files": no_files
+            "inserted_chunks": num_records,
+            "processed_files": num_files
         }
     )

@@ -14,9 +14,14 @@ class DataController(BaseController): # DataController inherits from BaseControl
 
 
     def validate_uploaded_file(self,file:UploadFile):
+        file_extension = os.path.splitext(file.filename)[1].lower() # get the extension of the file and convert it to lower case
+
+        if file_extension not in self.app_settings.FILE_ALLOWED_TYPES: # .pdf or .txt or .docx or .csv or .json
+            return False, ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value
+
         #this function takes object of the file then validate then return True/False.
-        if file.content_type not in self.app_settings.FILE_ALLOWED_TYPES: #check type
-            return False,ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value # لازم .value علشان ده responseSignal داخل ملف enum
+        #if file.content_type not in self.app_settings.FILE_ALLOWED_TYPES: #check type
+            #return False,ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value # لازم .value علشان ده responseSignal داخل ملف enum
         if file.size > self.app_settings.FILE_MAX_SIZE*self.size_scale: #check size (max num of bytes is 10 * 1048576
             # file.size return size in bytes,so we should convert FILE_MAX_SIZE to bytes.
             return False,ResponseSignal.FILE_SIZE_EXCEEDED.value # لازم .value علشان ده responseSignal داخل ملف enum

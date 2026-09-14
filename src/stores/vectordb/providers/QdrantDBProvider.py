@@ -38,6 +38,8 @@ class QdrantDBProvider(VectorDBInterface):
         return self.client.get_collections()
 
     def get_collection_info(self, collection_name: str) -> dict:
+        print("Requested collection:", collection_name)
+        print("Available collections:", self.client.get_collections())
         return self.client.get_collection(collection_name=collection_name)
 
     def delete_collection(self, collection_name: str):
@@ -47,6 +49,10 @@ class QdrantDBProvider(VectorDBInterface):
     def create_collection(self, collection_name: str,
                           embedding_size: int,
                           do_reset: bool = False):
+
+        print("DEBUG collection_name:",collection_name)
+        print("DEBUG embedding_size:",embedding_size)
+
         if do_reset:
             _ = self.delete_collection(collection_name=collection_name)
 
@@ -110,12 +116,13 @@ class QdrantDBProvider(VectorDBInterface):
 
             batch_texts = texts[i:batch_end]
             batch_vectors = vectors[i:batch_end]
+            print("DEBUG batch length:", len(batch_vectors[0]))
             batch_metadata = metadata[i:batch_end]
             batch_record_ids = record_ids[i:batch_end]
 
             batch_records = [
-                models.Record(
-                    id=[batch_record_ids[x]] if batch_record_ids[x] is not None else None,
+                models.PointStruct(
+                    id=batch_record_ids[x] if batch_record_ids[x] is not None else None,
                     vector=batch_vectors[x],
                     payload={
                         "text": batch_texts[x], "metadata": batch_metadata[x]
@@ -126,9 +133,9 @@ class QdrantDBProvider(VectorDBInterface):
             ]
 
             try:
-                _ = self.client.upload_records(
-                    collection_name=collection_name,
-                    records=batch_records,
+                _ = self.client.upsert(
+                    collection_name,
+                    batch_records,
                 )
             except Exception as e:
                 self.logger.error(f"Error while inserting batch: {e}")
@@ -138,11 +145,11 @@ class QdrantDBProvider(VectorDBInterface):
 
     def search_by_vector(self, collection_name: str, vector: list, limit: int = 5):
 
-        results = self.client.search(
+        results = self.client.query_points(
             collection_name=collection_name,
-            query_vector=vector,
+            query=vector,
             limit=limit
-        )
+        ).points
 
         if not results or len(results) == 0:
             return None

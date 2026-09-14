@@ -31,7 +31,7 @@ class Project(BaseModel):
         return [
             {
                 "key": [
-                    ("project_id", 1) #ascending order + mongoDB index on project_id field
+                    ("project_id", 1) #ascending order + mongoDB index on project_id field, -1 for descending order.
                 ],
                 "name": "project_id_index_1", # name of the index
                 "unique": True #Unique project id without duplicates

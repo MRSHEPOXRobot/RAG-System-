@@ -7,11 +7,11 @@ import json
 
 class NLPController(BaseController):
 
-    def __init__(self, vectordb_client, generation_client,
+    def __init__(self, vector_db_client, generation_client,
                  embedding_client, template_parser):
         super().__init__()
 
-        self.vectordb_client = vectordb_client
+        self.vectordb_client = vector_db_client
         self.generation_client = generation_client
         self.embedding_client = embedding_client
         self.template_parser = template_parser
@@ -27,7 +27,7 @@ class NLPController(BaseController):
         collection_name = self.get_collection_name(project_id=project.project_id)
         collection_info = self.vectordb_client.get_collection_info(collection_name=collection_name)
 
-        return json.loads(
+        return json.loads( # convert the collection_info object to a JSON string and then parse it back to a Python dictionary
             json.dumps(collection_info, default=lambda x: x.__dict__)
         )
 

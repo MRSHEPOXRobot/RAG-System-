@@ -17,6 +17,7 @@ nlp_router = APIRouter(
 )
 
 
+# define decorators for the endpoints
 @nlp_router.post("/index/push/{project_id}") # endpoint to index the project data into the vector database
 async def index_project(request: Request, project_id: str, push_request: PushRequest):
     project_model = await ProjectModel.create_instance(
@@ -40,7 +41,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
         )
 
     nlp_controller = NLPController(
-        vectordb_client=request.app.vectordb_client,
+        vector_db_client=request.app.vector_db_client,
         generation_client=request.app.generation_client,
         embedding_client=request.app.embedding_client,
         template_parser=request.app.template_parser,
@@ -52,7 +53,8 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
     idx = 0
 
     while has_records:
-        page_chunks = await chunk_model.get_project_chunks(project_id=project.id, page_no=page_no) #project.id is the internal id of the project in the database, not the project_id passed in the path parameter
+        page_chunks = await chunk_model.get_project_chunks(project_id=project.id, page_no=page_no)
+        #project.id is the internal id of the project in the database, not the project_id passed in the path parameter
         if len(page_chunks):
             page_no += 1
 
@@ -66,7 +68,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
         is_inserted = nlp_controller.index_into_vector_db(
             project=project,
             chunks=page_chunks,
-            do_reset=push_request.do_reset,
+            do_reset=push_request.do_reset and page_no == 2, # reset only on the first page
             chunks_ids=chunks_ids
         )
 
@@ -88,7 +90,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
     )
 
 
-@nlp_router.get("/index/info/{project_id}")
+@nlp_router.get("/index/info/{project_id}") # endpoint to get the vector database collection info for the project
 async def get_project_index_info(request: Request, project_id: str):
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
@@ -96,10 +98,10 @@ async def get_project_index_info(request: Request, project_id: str):
 
     project = await project_model.get_project_or_create_one(
         project_id=project_id
-    )
+    ) 
 
     nlp_controller = NLPController(
-        vectordb_client=request.app.vectordb_client,
+        vector_db_client=request.app.vector_db_client,
         generation_client=request.app.generation_client,
         embedding_client=request.app.embedding_client,
         template_parser=request.app.template_parser,
@@ -126,7 +128,7 @@ async def search_index(request: Request, project_id: str, search_request: Search
     )
 
     nlp_controller = NLPController(
-        vectordb_client=request.app.vectordb_client,
+        vector_db_client=request.app.vector_db_client,
         generation_client=request.app.generation_client,
         embedding_client=request.app.embedding_client,
         template_parser=request.app.template_parser,
@@ -163,7 +165,7 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
     )
 
     nlp_controller = NLPController(
-        vectordb_client=request.app.vectordb_client,
+        vector_db_client=request.app.vector_db_client,
         generation_client=request.app.generation_client,
         embedding_client=request.app.embedding_client,
         template_parser=request.app.template_parser,
