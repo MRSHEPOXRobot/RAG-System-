@@ -11,8 +11,8 @@ class NLPController(BaseController):
                  embedding_client, template_parser):
         super().__init__()
 
-        self.vectordb_client = vector_db_client
-        self.generation_client = generation_client
+        self.vectordb_client = vector_db_client # Vector database client for managing collections and performing searches
+        self.generation_client = generation_client # OpenAI or other LLM provider client for text generation
         self.embedding_client = embedding_client
         self.template_parser = template_parser
 
@@ -106,17 +106,25 @@ class NLPController(BaseController):
         # step2: Construct LLM prompt
         system_prompt = self.template_parser.get("rag", "system_prompt")
 
+
+        print("retrived_document: " , retrieved_documents)
+        print("System Prompt: ", system_prompt)
+        # Construct documents prompts (Comprehensive prompts for each retrieved document)
         documents_prompts = "\n".join([
             self.template_parser.get("rag", "document_prompt", {
                 "doc_num": idx + 1,
                 "chunk_text": doc.text,
             })
+
             for idx, doc in enumerate(retrieved_documents)
         ])
+        print("Documents Prompts: ", documents_prompts)
 
         footer_prompt = self.template_parser.get("rag", "footer_prompt", {
             "query": query
         })
+
+        print("footer_prompt: ", footer_prompt)
 
         # step3: Construct Generation Client Prompts
         chat_history = [

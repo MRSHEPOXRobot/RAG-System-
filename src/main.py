@@ -10,6 +10,7 @@ from helpers.config import get_settings
 from stores.llm import LLMProviderFactory
 from stores.llm.templates.template_parser import TemplateParser
 from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
+from sqlalchemy.ext.asyncio import create_async_engine
 
 
 @asynccontextmanager
@@ -17,9 +18,10 @@ async def lifespan(app: FastAPI):
     # Startup
     settings = get_settings()
 
-    app.mongo_conn = AsyncIOMotorClient(
-        settings.MONGODB_URL
-    )
+    ##app.mongo_conn = AsyncIOMotorClient(
+        ##settings.MONGODB_URL
+    ##)
+
 
     app.db_client = app.mongo_conn[
         settings.MONGODB_DATABASE

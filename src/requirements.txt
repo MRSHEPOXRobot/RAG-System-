@@ -11,3 +11,5 @@ pydantic-mongo == 3.1.0
 openai == 3.1.0
 cohere == 7.0.8
 qdrant-client == 1.19.0
+SQLAlchemy == 2.0.54
+asyncpg == 0.31.0
